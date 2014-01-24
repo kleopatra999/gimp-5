@@ -81,7 +81,7 @@
 Summary:        GNU Image Manipulation Program
 Name:           gimp
 Epoch:          2
-Version:        2.8.8
+Version:        2.8.10
 Release:        %{?prerelprefix}3%{dotprerel}%{dotgitrev}%{?dist}
 
 # Compute some version related macros
@@ -206,18 +206,8 @@ Patch0:         gimp-%{version}%{dashprerel}-git%{gitrev}.patch.bz2
 # Fedora specific.
 Patch1:         gimp-2.8.2-cm-system-monitor-profile-by-default.patch
 
-# Avoid crash in lcms plug-in.
-# Upstream commit dc6ccc17495bcabbd96d4c18616cb4b57bd07ea6
-Patch2:         gimp-2.8.8-lcms-profile-crash.patch
-
-# Fix problems found during static code check (Coverity).
-# Upstream commit dc8bb4eecf43eadae1bc562def7569e59d6515b7
-# Upstream commit 6abd0f2438dd3b025b1224ab6a473615c17f3418
-# Upstream commit 8082363e9c887b9f31e43b7fc947e1867f9c087b
-# Upstream commit 5c2f97f9f274bc20eef4ffd55c28156c39254343
-# Upstream commit d291de0949c13eb2195158f6fbf41da2afe46cb9
-# Upstream commit 92a0387adc5a0e78501f6151b1d52c4c96f684a8
-Patch3:         gimp-2.8.8-static-code-check.patch
+# CVE-2013-1913, CVE-2013-1978
+Patch2:         gimp-2.8.10-CVE-2013-1913,1978.patch
 
 # use external help browser directly if help browser plug-in is not built
 Patch100:       gimp-2.8.6-external-help-browser.patch
@@ -308,8 +298,7 @@ EOF
 %endif
 
 %patch1 -p1 -b .cm-system-monitor-profile-by-default
-%patch2 -p1 -b .lcms-profile-crash
-%patch3 -p1 -b .static-code-check
+%patch2 -p1 -b .CVE-2013-1913,1978
 
 %if ! %{with helpbrowser}
 %patch100 -p1 -b .external-help-browser
@@ -455,7 +444,7 @@ ln -snf gimprc-%{binver}.5 %{buildroot}/%{_mandir}/man5/gimprc.5
 # Hardcode python interpreter in shipped python plug-ins. This actually has no
 # effect because gimp maps hashbangs with and without the /usr/bin/env detour
 # to the system python interpreter, but this will avoid false alarms.
-egrep -rl '^#!\s*%{_bindir}/env\s+python' --include=\*.py "%buildroot" |
+grep -E -rl '^#!\s*%{_bindir}/env\s+python' --include=\*.py "%buildroot" |
     while read file; do
         sed -r '1s,^#!\s*%{_bindir}/env\s+python,#!%{__python},' -i "$file"
     done
@@ -623,6 +612,19 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %endif
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 2:2.8.10-3
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 2:2.8.10-2
+- Mass rebuild 2013-12-27
+
+* Fri Nov 29 2013 Nils Philippsen <nils@redhat.com> - 2:2.8.10-1
+- version 2.8.10
+
+* Tue Nov 26 2013 Nils Philippsen <nils@redhat.com> - 2:2.8.8-4
+- fix overflow in XWD loader (CVE-2013-1913, CVE-2013-1978)
+- use grep -E instead of egrep
+
 * Fri Nov 08 2013 Nils Philippsen <nils@redhat.com> - 2:2.8.8-3
 - file-bmp: don't close already closed FD
 
